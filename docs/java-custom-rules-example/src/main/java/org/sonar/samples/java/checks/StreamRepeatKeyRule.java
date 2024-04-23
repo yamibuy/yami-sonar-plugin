@@ -27,16 +27,19 @@ public class StreamRepeatKeyRule extends IssuableSubscriptionVisitor {
   @Override
   public void visitNode(Tree visitTree) {
     MethodInvocationTree methodInvocation = (MethodInvocationTree) visitTree;
-    MemberSelectExpressionTree memberSelect = (MemberSelectExpressionTree) methodInvocation.methodSelect();
-    String firstToken = memberSelect.firstToken().text();
-    String lastToken = memberSelect.lastToken().text();
-    String operatorToken = memberSelect.operatorToken().text();
-    String exp = firstToken + operatorToken + lastToken;
-    if ("Collectors.toMap".equals(exp)) {
-      // 检查是否有处理重复 key 的情况， 简单判断，入参2个说明没有处理重复KEY情况
-      if (methodInvocation.arguments().size() == 2) {
-        reportIssue(visitTree, "Found Collectors.toMap operation without handling duplicate keys");
+    ExpressionTree memberSelect = methodInvocation.methodSelect();
+    try {
+      String firstToken = memberSelect.firstToken().text();
+      String lastToken = memberSelect.lastToken().text();
+      String exp = firstToken + "." + lastToken;
+      if ("Collectors.toMap".equals(exp)) {
+        // 检查是否有处理重复 key 的情况， 简单判断，入参2个说明没有处理重复KEY情况
+        if (methodInvocation.arguments().size() == 2) {
+          reportIssue(visitTree, "Found Collectors.toMap operation without handling duplicate keys");
+        }
       }
+    } catch (Exception e) {
+      e.printStackTrace();
     }
   }
 }
