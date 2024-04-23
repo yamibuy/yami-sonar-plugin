@@ -6,7 +6,7 @@
   <groupId>org.sonar.samples</groupId>
 
   <!-- Change this artifactId to your own organization artifactId -->
-  <artifactId>java-custom-rules-example</artifactId>
+  <artifactId>java-yamibuy-rules</artifactId>
 
   <version>1.0.0-SNAPSHOT</version>
 
@@ -19,14 +19,14 @@
   <description>Java Custom Rules Example for SonarQube</description>
 
   <properties>
-    <sonarqube.version>7.9.6</sonarqube.version>
-    <sonarjava.version>6.3.2.22818</sonarjava.version>
+    <sonarqube.version>8.9.0.43852</sonarqube.version>
+    <sonarjava.version>6.15.1.26025</sonarjava.version>
     <!-- Don't forget to update this version of JaCoCo -->
     <jacoco.version>0.8.7</jacoco.version>
     <!-- Use UTF-8 for all resources -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <!-- Make sure to be compatible with java 8 -->
-    <!--<maven.compiler.release>8</maven.compiler.release>-->
+    <!--<maven.compiler.release>1.8</maven.compiler.release>-->
   </properties>
 
   <dependencies>
@@ -97,6 +97,8 @@
           <pluginName>Java Custom Rules</pluginName>
           <pluginClass>org.sonar.samples.java.MyJavaRulesPlugin</pluginClass>
           <sonarLintSupported>true</sonarLintSupported>
+          <!-- FIXME: https://jira.sonarsource.com/browse/SLCORE-315 -->
+          <!-- SonarLint currently supports only up to SQ 8.5, instead of 8.9 LTS -->
           <sonarQubeMinVersion>7.9</sonarQubeMinVersion>
           <requirePlugins>java:${sonarjava.version}</requirePlugins>
         </configuration>
