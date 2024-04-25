@@ -31,7 +31,11 @@ public class ForStatementTreeIoRule extends IssuableSubscriptionVisitor {
 
   @Override
   public List<Tree.Kind> nodesToVisit() {
-    return Stream.of(Tree.Kind.FOR_STATEMENT, Tree.Kind.FOR_EACH_STATEMENT, Tree.Kind.WHILE_STATEMENT).collect(Collectors.toList());
+    return Stream.of(Tree.Kind.FOR_STATEMENT,
+      Tree.Kind.FOR_EACH_STATEMENT,
+      Tree.Kind.DO_STATEMENT,
+      Tree.Kind.WHILE_STATEMENT
+    ).collect(Collectors.toList());
   }
 
   /**
