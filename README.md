@@ -5,6 +5,10 @@
 # 插件开发文档
 * https://github.com/SonarSource/sonar-java/blob/master/docs/CUSTOM_RULES_101.md
 
+# rule级别描述
+* type - String. One of BUG, VULNERABILITY, CODE_SMELL
+* 
+
 # 打包部署
 1. 先打包
 ```shell
