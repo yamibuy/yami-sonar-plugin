@@ -16,7 +16,11 @@ public class ForStatementTreeIoRule extends IssuableSubscriptionVisitor {
   private static List<String> io_key_words = new ArrayList<>();
 
   static {
+    io_key_words.add(".*redis.*");
+    io_key_words.add(".*Redis.*");
+    io_key_words.add(".*Jedis.*");
     io_key_words.add(".*jedis.*");
+    io_key_words.add(".+Client");
     io_key_words.add(".+client");
     io_key_words.add(".+Dao");
   }
@@ -82,11 +86,11 @@ public class ForStatementTreeIoRule extends IssuableSubscriptionVisitor {
   private String getIOOperationName(MethodInvocationTree mit) {
     // 检查方法调用的全路径类名，以确定是否涉及IO操作
     AssessableExpressionTree expressionTree = (AssessableExpressionTree) mit.methodSelect();
-
     String invokeName = getInvokeNameMethodName(expressionTree);
     System.out.println("方法调用:" + invokeName);
+    String[] invokeNameArray = invokeName.split("\\.");
     for (String ioKeyWord : io_key_words) {
-      if (invokeName.matches(ioKeyWord)) {
+      if (invokeNameArray[0].matches(ioKeyWord)) {
         return invokeName;
       }
     }
