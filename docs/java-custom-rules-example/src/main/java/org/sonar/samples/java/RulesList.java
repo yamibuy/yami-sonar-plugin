@@ -43,7 +43,8 @@ public final class RulesList {
    */
   public static List<Class<? extends JavaCheck>> getJavaChecks() {
     return Collections.unmodifiableList(Arrays.asList(
-      StreamRepeatKeyRule.class
+      StreamRepeatKeyRule.class,
+      ForStatementTreeIoRule.class
       ));
   }
 
