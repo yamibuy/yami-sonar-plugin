@@ -18,11 +18,15 @@ public class ForStatementTreeIoRule extends IssuableSubscriptionVisitor {
   static {
     io_key_words.add(".*redis.*");
     io_key_words.add(".*Redis.*");
+
     io_key_words.add(".*Jedis.*");
     io_key_words.add(".*jedis.*");
+
     io_key_words.add(".+Client");
     io_key_words.add(".+client");
+
     io_key_words.add(".+Dao");
+    io_key_words.add(".+Mapper");
   }
 
   @Override
