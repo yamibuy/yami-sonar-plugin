@@ -1,0 +1,21 @@
+<p>用java流集合 转 map 时，一定要预防重复Key的情况.</p>
+
+<h2>不合规代码示例</h2>
+<pre>
+class MyClass {
+  static void foo1(){
+    List<Integer> stream = Stream.of(1, 2, 3, 4).toList();
+    Map<Integer, Integer> mapValue = stream.stream().collect(Collectors.toMap(key -> key, Function.identity()));
+  }
+}
+</pre>
+
+<h2>合规解决方案</h2>
+<pre>
+class MyClass {
+  static void foo2(){
+    List<Integer> stream = Stream.of(1, 2, 3, 4).toList();
+    Map<Integer, Integer> mapValue2 = stream.stream().collect(Collectors.toMap(key -> key, Function.identity(), (key1, ke2) -> key1));
+  }
+}
+</pre>
