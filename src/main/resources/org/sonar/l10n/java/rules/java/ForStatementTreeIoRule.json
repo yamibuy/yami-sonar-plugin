@@ -3,7 +3,7 @@
   "type": "Bug",
   "status": "ready",
   "tags": [
-    "bugs"
+    "code-smell"
   ],
-  "defaultSeverity": "Critical"
+  "defaultSeverity": "major"
 }
