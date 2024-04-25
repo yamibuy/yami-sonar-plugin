@@ -1,6 +1,6 @@
 {
   "title": "循环内调用IO相关操作",
-  "type": "Bug",
+  "type": "code-smell",
   "status": "ready",
   "tags": [
     "code-smell"
