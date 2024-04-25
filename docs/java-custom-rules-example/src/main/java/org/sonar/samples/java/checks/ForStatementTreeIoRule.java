@@ -86,7 +86,7 @@ public class ForStatementTreeIoRule extends IssuableSubscriptionVisitor {
   }
 
   /**
-   * 判断方法内部是不是IO操作
+   * 获取循环内部可能出现IO操作的方法名称
    *
    * @param mit
    * @return
@@ -96,6 +96,7 @@ public class ForStatementTreeIoRule extends IssuableSubscriptionVisitor {
     AssessableExpressionTree expressionTree = (AssessableExpressionTree) mit.methodSelect();
     String invokeName = getInvokeNameMethodName(expressionTree);
     System.out.println("方法调用:" + invokeName);
+    // 只看对象形参名称，方法名不重要
     String[] invokeNameArray = invokeName.split("\\.");
     for (String ioKeyWord : io_key_words) {
       if (invokeNameArray[0].matches(ioKeyWord)) {
