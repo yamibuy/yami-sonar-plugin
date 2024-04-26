@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 public class ForStatementTreeIoRule extends IssuableSubscriptionVisitor {
 
 
-  private static final int MAX_DEEP = 50;
+  private static final int MAX_DEEP = 500;
 
   /**
    * 最顶端的方法入口
@@ -35,7 +35,6 @@ public class ForStatementTreeIoRule extends IssuableSubscriptionVisitor {
     io_key_words.add(".+Mapper");
   }
 
-  private static List<String> ignore_keyword = new ArrayList<>();
   @Override
   public List<Tree.Kind> nodesToVisit() {
     return Stream.of(Tree.Kind.FOR_STATEMENT,
@@ -67,6 +66,11 @@ public class ForStatementTreeIoRule extends IssuableSubscriptionVisitor {
   }
 
   private void checkForIOOperation(Tree parentTree, MethodInvocationTree mit, AtomicInteger deepTimes) {
+    String currMethod = getMethodCallName(mit);
+    if (currMethod.matches(".*Enum.*")) {
+      System.out.println("枚举, 退出");
+      return;
+    }
     int times = deepTimes.getAndIncrement();
     if (times > MAX_DEEP) {
       System.out.println("循环递归太深入，退出:" + operationNameSuper);
@@ -79,8 +83,7 @@ public class ForStatementTreeIoRule extends IssuableSubscriptionVisitor {
       reportIssue(parentTree, issue);
     } else {
       if (operationNameSuper == null) {
-        String firstText = getMethodCallName(mit);
-        operationNameSuper = firstText;
+        operationNameSuper = currMethod;
       }
       // 递归检查方法调用内部是否包含IO操作
       Symbol methodSymbol = mit.symbol();
