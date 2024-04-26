@@ -17,8 +17,6 @@ import java.util.stream.Stream;
 @Rule(key = "ForStatementTreeIoRule")
 public class ForStatementTreeIoRule extends IssuableSubscriptionVisitor {
 
-  protected Log log = LogFactory.getLog(ForStatementTreeIoRule.class);
-
   private static List<String> io_key_words = new ArrayList<>();
 
   static {
@@ -108,15 +106,16 @@ public class ForStatementTreeIoRule extends IssuableSubscriptionVisitor {
       IdentifierTreeImpl identifierTreeImpl = (IdentifierTreeImpl) expressionTree;
       children = identifierTreeImpl.children();
     } else {
-      log.info("发现未知的成员方法类:" + expressionTree);
+      System.out.println("发现未知的成员方法类:" + expressionTree);
       return null;
     }
     String invokeName = getInvokeNameMethodName(children);
-    System.out.println("方法调用:" + invokeName);
+    // System.out.println("方法调用:" + invokeName);
     // 只看对象形参名称，方法名不重要
     String[] invokeNameArray = invokeName.split("\\.");
     for (String ioKeyWord : io_key_words) {
       if (invokeNameArray[0].matches(ioKeyWord)) {
+        System.out.println("发现循环调用方法:" + invokeName);
         return invokeName;
       }
     }
