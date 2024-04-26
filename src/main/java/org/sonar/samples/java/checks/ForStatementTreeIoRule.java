@@ -7,6 +7,7 @@ import org.sonar.plugins.java.api.tree.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -14,6 +15,8 @@ import java.util.stream.Stream;
 public class ForStatementTreeIoRule extends IssuableSubscriptionVisitor {
 
   private static List<String> io_key_words = new ArrayList<>();
+
+  private static final int MAX_DEEP = 50;
 
   /**
    * 最顶端的方法入口
@@ -52,18 +55,23 @@ public class ForStatementTreeIoRule extends IssuableSubscriptionVisitor {
    */
   @Override
   public void visitNode(Tree parentTree) {
+    AtomicInteger deepTimes = new AtomicInteger();
     StatementTree body = (StatementTree) parentTree;
     // 检查循环体内的语句
     body.accept(new BaseTreeVisitor() {
       @Override
       public void visitMethodInvocation(MethodInvocationTree mit) {
-        checkForIOOperation(parentTree, mit);
+        checkForIOOperation(parentTree, mit, deepTimes);
         super.visitMethodInvocation(mit);
       }
     });
   }
 
-  private void checkForIOOperation(Tree parentTree, MethodInvocationTree mit) {
+  private void checkForIOOperation(Tree parentTree, MethodInvocationTree mit, AtomicInteger deepTimes) {
+    int times = deepTimes.getAndIncrement();
+    if (times > MAX_DEEP) {
+      System.out.println("循环递归太深入，退出:" + operationNameSuper);
+    }
     String operationName = null;
     if ((operationName = getIOOperationName(mit)) != null) {
       String issue = "循环内发现疑似IO操作，入口处为：" + operationNameSuper + ", IO操作为: " + operationName;
@@ -87,7 +95,7 @@ public class ForStatementTreeIoRule extends IssuableSubscriptionVisitor {
           methodBody.accept(new BaseTreeVisitor() {
             @Override
             public void visitMethodInvocation(MethodInvocationTree innerMit) {
-              checkForIOOperation(parentTree, innerMit);
+              checkForIOOperation(parentTree, innerMit, deepTimes);
               super.visitMethodInvocation(innerMit);
             }
           });
