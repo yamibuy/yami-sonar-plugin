@@ -46,6 +46,13 @@
       <scope>provided</scope>
     </dependency>
 
+    <!-- 写for循环插件找不到这个类AssessableExpressionTree，尝试主动打包进去 -->
+    <dependency>
+      <groupId>org.sonarsource.java</groupId>
+      <artifactId>java-frontend</artifactId>
+      <version>${sonarjava.version}</version>
+    </dependency>
+
     <dependency>
       <groupId>org.sonarsource.analyzer-commons</groupId>
       <artifactId>sonar-analyzer-commons</artifactId>
