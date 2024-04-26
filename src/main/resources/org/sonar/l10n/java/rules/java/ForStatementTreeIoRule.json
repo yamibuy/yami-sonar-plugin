@@ -1,5 +1,5 @@
 {
-  "title": "循环内调用IO相关操作",
+  "title": "yami_rule:循环内调用IO相关操作",
   "type": "CODE_SMELL",
   "status": "ready",
   "tags": [
