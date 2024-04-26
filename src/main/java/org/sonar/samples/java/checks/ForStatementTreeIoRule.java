@@ -1,7 +1,11 @@
 package org.sonar.samples.java.checks;
 
+import org.apache.juli.logging.Log;
+import org.apache.juli.logging.LogFactory;
 import org.sonar.check.Rule;
 import org.sonar.java.model.expression.AssessableExpressionTree;
+import org.sonar.java.model.expression.IdentifierTreeImpl;
+import org.sonar.java.model.expression.MemberSelectExpressionTreeImpl;
 import org.sonar.plugins.java.api.IssuableSubscriptionVisitor;
 import org.sonar.plugins.java.api.semantic.Symbol;
 import org.sonar.plugins.java.api.tree.*;
@@ -12,6 +16,8 @@ import java.util.stream.Stream;
 
 @Rule(key = "ForStatementTreeIoRule")
 public class ForStatementTreeIoRule extends IssuableSubscriptionVisitor {
+
+  protected Log log = LogFactory.getLog(ForStatementTreeIoRule.class);
 
   private static List<String> io_key_words = new ArrayList<>();
 
@@ -93,8 +99,19 @@ public class ForStatementTreeIoRule extends IssuableSubscriptionVisitor {
    */
   private String getIOOperationName(MethodInvocationTree mit) {
     // 检查方法调用的全路径类名，以确定是否涉及IO操作
-    AssessableExpressionTree expressionTree = (AssessableExpressionTree) mit.methodSelect();
-    String invokeName = getInvokeNameMethodName(expressionTree);
+    ExpressionTree expressionTree = mit.methodSelect();
+    List<Tree> children = Collections.emptyList();
+    if (expressionTree.is(Tree.Kind.MEMBER_SELECT)) {
+      MemberSelectExpressionTreeImpl memberSelectExpressionTree = (MemberSelectExpressionTreeImpl) expressionTree;
+      children = memberSelectExpressionTree.children();
+    } else if (expressionTree.is(Tree.Kind.IDENTIFIER)) {
+      IdentifierTreeImpl identifierTreeImpl = (IdentifierTreeImpl) expressionTree;
+      children = identifierTreeImpl.children();
+    } else {
+      log.info("发现未知的成员方法类:" + expressionTree);
+      return null;
+    }
+    String invokeName = getInvokeNameMethodName(children);
     System.out.println("方法调用:" + invokeName);
     // 只看对象形参名称，方法名不重要
     String[] invokeNameArray = invokeName.split("\\.");
@@ -109,13 +126,12 @@ public class ForStatementTreeIoRule extends IssuableSubscriptionVisitor {
   /**
    * 获取方法调用的对象以及方法名
    *
-   * @param expressionTree
+   * @param trees
    * @return
    */
-  public String getInvokeNameMethodName(AssessableExpressionTree expressionTree) {
+  public String getInvokeNameMethodName(List<Tree> trees) {
     StringBuilder str = new StringBuilder();
-    List<Tree> children = expressionTree.getChildren();
-    for (Tree child : children) {
+    for (Tree child : trees) {
       str.append(child.firstToken().text());
     }
     return str.toString();
