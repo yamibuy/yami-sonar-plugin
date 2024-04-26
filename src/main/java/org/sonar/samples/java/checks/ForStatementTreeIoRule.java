@@ -15,6 +15,11 @@ public class ForStatementTreeIoRule extends IssuableSubscriptionVisitor {
 
   private static List<String> io_key_words = new ArrayList<>();
 
+  /**
+   * 最顶端的方法入口
+   */
+  private String operationNameSuper = null;
+
   static {
    /* io_key_words.add(".*redis.*");
     io_key_words.add(".*Redis.*");*/
@@ -61,8 +66,14 @@ public class ForStatementTreeIoRule extends IssuableSubscriptionVisitor {
   private void checkForIOOperation(Tree parentTree, MethodInvocationTree mit) {
     String operationName = null;
     if ((operationName = getIOOperationName(mit)) != null) {
-      reportIssue(parentTree, "循环内发现疑似IO操作，IO操作为: " + operationName);
+      String issue = "循环内发现疑似IO操作，入口处为：" + operationNameSuper + ", IO操作为: " + operationName;
+      System.out.println(issue);
+      reportIssue(parentTree, issue);
     } else {
+      if (operationNameSuper == null) {
+        String firstText = getMethodCallName(mit);
+        operationNameSuper = firstText;
+      }
       // 递归检查方法调用内部是否包含IO操作
       Symbol methodSymbol = mit.symbol();
       if (methodSymbol.isUnknown()) {
@@ -86,6 +97,22 @@ public class ForStatementTreeIoRule extends IssuableSubscriptionVisitor {
   }
 
   /**
+   * 获取方法调用名称
+   *
+   * @param mit
+   * @return
+   */
+  private String getMethodCallName(MethodInvocationTree mit) {
+    ExpressionTree expressionTree = mit.methodSelect();
+    String firstText = expressionTree.firstToken().text();
+    String lastText = expressionTree.lastToken().text();
+    if (!firstText.equals(lastText)) {
+      firstText = firstText + "." + lastText;
+    }
+    return firstText;
+  }
+
+  /**
    * 获取循环内部可能出现IO操作的方法名称
    *
    * @param mit
@@ -94,14 +121,13 @@ public class ForStatementTreeIoRule extends IssuableSubscriptionVisitor {
   private String getIOOperationName(MethodInvocationTree mit) {
     try {
       // 检查方法调用的全路径类名，以确定是否涉及IO操作
-      ExpressionTree expressionTree = mit.methodSelect();
-      String invokeName = expressionTree.firstToken().text() + "." + expressionTree.lastToken().text();
+      String invokeName = getMethodCallName(mit);
       // System.out.println("方法调用:" + invokeName);
       // 只看对象形参名称，方法名不重要
       String[] invokeNameArray = invokeName.split("\\.");
       for (String ioKeyWord : io_key_words) {
         if (invokeNameArray[0].matches(ioKeyWord)) {
-          System.out.println("发现循环调用方法:" + invokeName);
+          // System.out.println("发现循环调用方法:" + invokeName);
           return invokeName;
         }
       }
@@ -110,19 +136,5 @@ public class ForStatementTreeIoRule extends IssuableSubscriptionVisitor {
       e.printStackTrace();
       return null;
     }
-  }
-
-  /**
-   * 获取方法调用的对象以及方法名
-   *
-   * @param trees
-   * @return
-   */
-  public String getInvokeNameMethodName(List<Tree> trees) {
-    StringBuilder str = new StringBuilder();
-    for (Tree child : trees) {
-      str.append(child.firstToken().text());
-    }
-    return str.toString();
   }
 }
