@@ -1,6 +1,7 @@
 package org.sonar.samples.java.checks;
 
 import org.sonar.check.Rule;
+import org.sonar.java.model.declaration.MethodTreeImpl;
 import org.sonar.plugins.java.api.IssuableSubscriptionVisitor;
 import org.sonar.plugins.java.api.semantic.Symbol;
 import org.sonar.plugins.java.api.tree.*;
@@ -14,13 +15,7 @@ import java.util.stream.Stream;
 @Rule(key = "ForStatementTreeIoRule")
 public class ForStatementTreeIoRule extends IssuableSubscriptionVisitor {
 
-
-  private static final int MAX_DEEP = 500;
-
-  /**
-   * 最顶端的方法入口
-   */
-  private String operationNameSuper = null;
+  private static final int MAX_DEEP = 10;
 
   private static List<String> io_key_words = new ArrayList<>();
 
@@ -68,23 +63,22 @@ public class ForStatementTreeIoRule extends IssuableSubscriptionVisitor {
   private void checkForIOOperation(Tree parentTree, MethodInvocationTree mit, AtomicInteger deepTimes) {
     String currMethod = getMethodCallName(mit);
     if (currMethod.matches(".*Enum.*")) {
-      System.out.println("枚举, 退出");
+      // System.out.println("枚举" + currMethod + ", 退出");
       return;
     }
-    int times = deepTimes.getAndIncrement();
-    if (times > MAX_DEEP) {
-      System.out.println("循环递归太深入，退出:" + operationNameSuper);
+    int times = deepTimes.get();
+    if (times >= MAX_DEEP) {
+      // System.out.println("循环递归太深入" + times + "，退出:" + currMethod);
       return;
     }
+    deepTimes.getAndIncrement();
     String operationName = null;
     if ((operationName = getIOOperationName(mit)) != null) {
-      String issue = "循环内发现疑似IO操作，入口处为：" + operationNameSuper + ", IO操作为: " + operationName;
+      String parentMethod = findParentMethod(mit);
+      String issue = "循环内发现疑似IO操作，入口处为：" + parentMethod + ", IO操作为: " + operationName;
       System.out.println(issue);
       reportIssue(parentTree, issue);
     } else {
-      if (operationNameSuper == null) {
-        operationNameSuper = currMethod;
-      }
       // 递归检查方法调用内部是否包含IO操作
       Symbol methodSymbol = mit.symbol();
       if (methodSymbol.isUnknown()) {
@@ -105,6 +99,31 @@ public class ForStatementTreeIoRule extends IssuableSubscriptionVisitor {
         }
       }
     }
+  }
+
+  /**
+   * 获取上一次 的方法调用
+   *
+   * @param mit
+   * @return
+   */
+  private String findParentMethod(MethodInvocationTree mit) {
+    try {
+      Tree parent = mit;
+      int times = 0;
+      while (parent != null && times < 20) {
+        times++;
+        parent = parent.parent();
+        if (parent.is(Tree.Kind.METHOD)) {
+          break;
+        }
+      }
+      MethodTree methodTree = (MethodTree) parent;
+      return methodTree.simpleName().name();
+    } catch (Exception e) {
+      return "未知";
+    }
+
   }
 
   /**
