@@ -16,8 +16,8 @@ public class ForStatementTreeIoRule extends IssuableSubscriptionVisitor {
   private static List<String> io_key_words = new ArrayList<>();
 
   static {
-    io_key_words.add(".*redis.*");
-    io_key_words.add(".*Redis.*");
+   /* io_key_words.add(".*redis.*");
+    io_key_words.add(".*Redis.*");*/
 
     io_key_words.add(".*Jedis.*");
     io_key_words.add(".*jedis.*");
