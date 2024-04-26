@@ -14,7 +14,6 @@ import java.util.stream.Stream;
 @Rule(key = "ForStatementTreeIoRule")
 public class ForStatementTreeIoRule extends IssuableSubscriptionVisitor {
 
-  private static List<String> io_key_words = new ArrayList<>();
 
   private static final int MAX_DEEP = 50;
 
@@ -23,10 +22,9 @@ public class ForStatementTreeIoRule extends IssuableSubscriptionVisitor {
    */
   private String operationNameSuper = null;
 
-  static {
-   /* io_key_words.add(".*redis.*");
-    io_key_words.add(".*Redis.*");*/
+  private static List<String> io_key_words = new ArrayList<>();
 
+  static {
     io_key_words.add(".*Jedis.*");
     io_key_words.add(".*jedis.*");
 
@@ -37,6 +35,7 @@ public class ForStatementTreeIoRule extends IssuableSubscriptionVisitor {
     io_key_words.add(".+Mapper");
   }
 
+  private static List<String> ignore_keyword = new ArrayList<>();
   @Override
   public List<Tree.Kind> nodesToVisit() {
     return Stream.of(Tree.Kind.FOR_STATEMENT,
@@ -71,6 +70,7 @@ public class ForStatementTreeIoRule extends IssuableSubscriptionVisitor {
     int times = deepTimes.getAndIncrement();
     if (times > MAX_DEEP) {
       System.out.println("循环递归太深入，退出:" + operationNameSuper);
+      return;
     }
     String operationName = null;
     if ((operationName = getIOOperationName(mit)) != null) {
